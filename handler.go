@@ -1,4 +1,4 @@
-// Package logur provides a Logur logger error handler.
+// Package logur provides an error handler using a Logur compatible logger.
 package logur
 
 import (
