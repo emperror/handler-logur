@@ -1,9 +1,9 @@
 package logur_test
 
 import (
-	"errors"
 	"fmt"
 
+	"emperror.dev/errors"
 	"github.com/goph/logur"
 
 	logurhandler "emperror.dev/handler/logur"
@@ -20,6 +20,9 @@ type errorLogger struct{}
 
 func (e *errorLogger) Error(msg string, fields ...map[string]interface{}) {
 	fmt.Println(msg)
+	if len(fields) > 0 && len(fields[0]) > 0 {
+		fmt.Println(fields[0])
+	}
 }
 
 func newLogurLogger() logur.ErrorLogger {
@@ -36,4 +39,17 @@ func ExampleHandler_Handle() {
 
 	// Output:
 	// error
+}
+
+func ExampleWithStackInfo() {
+	logger := newLogurLogger()
+	handler := logurhandler.WithStackInfo(logurhandler.New(logger))
+
+	err := errors.New("error")
+
+	handler.Handle(err)
+
+	// Output:
+	// error
+	// map[file:example_test.go:48 func:ExampleWithStackInfo]
 }
