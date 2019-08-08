@@ -40,16 +40,3 @@ func ExampleHandler_Handle() {
 	// Output:
 	// error
 }
-
-func ExampleWithStackInfo() {
-	logger := newLogurLogger()
-	handler := logurhandler.WithStackInfo(logurhandler.New(logger))
-
-	err := errors.New("error")
-
-	handler.Handle(err)
-
-	// Output:
-	// error
-	// map[file:example_test.go:48 func:ExampleWithStackInfo]
-}
