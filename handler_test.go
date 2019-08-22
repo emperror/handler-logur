@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"emperror.dev/errors"
-	"github.com/goph/logur"
-	"github.com/goph/logur/logtesting"
+	"logur.dev/logur"
+	"logur.dev/logur/logtesting"
 )
 
 type errorsStub struct {

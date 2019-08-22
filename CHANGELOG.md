@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Use new [logur package](https://github.com/logur)
+
 
 ## 0.1.0 - 2019-07-18
 

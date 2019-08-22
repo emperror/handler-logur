@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"emperror.dev/errors"
-	"github.com/goph/logur"
+	"logur.dev/logur"
 
 	logurhandler "emperror.dev/handler/logur"
 )
@@ -25,7 +25,7 @@ func (e *errorLogger) Error(msg string, fields ...map[string]interface{}) {
 	}
 }
 
-func newLogurLogger() logur.ErrorLogger {
+func newLogurLogger() *errorLogger {
 	return &errorLogger{}
 }
 
