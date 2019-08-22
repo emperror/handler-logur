@@ -6,7 +6,7 @@ import (
 
 	"emperror.dev/errors"
 	"emperror.dev/errors/utils/keyval"
-	"github.com/goph/logur"
+	"logur.dev/logur"
 )
 
 // Handler logs errors using a Logur compatible logger.

@@ -3,7 +3,9 @@ module emperror.dev/handler/logur
 go 1.12
 
 require (
-	emperror.dev/emperror v0.21.0
 	emperror.dev/errors v0.4.1
-	github.com/goph/logur v0.11.2
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/testify v1.2.2 // indirect
+	logur.dev/logur v0.15.0
 )
