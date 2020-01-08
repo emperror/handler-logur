@@ -8,4 +8,4 @@ linters:
     enable-all: true
 
 service:
-    golangci-lint-version: 1.17.x
+    golangci-lint-version: 1.21.x
