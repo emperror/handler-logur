@@ -1,8 +1,10 @@
 # Logur error handler
 
-[![CircleCI](https://circleci.com/gh/emperror/handler-logur.svg?style=svg)](https://circleci.com/gh/emperror/handler-logur)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/emperror/handler-logur/CI?style=flat-square)
+[![Codecov](https://img.shields.io/codecov/c/github/emperror/handler-logur?style=flat-square)](https://codecov.io/gh/emperror/handler-logur)
 [![Go Report Card](https://goreportcard.com/badge/emperror.dev/handler/logur?style=flat-square)](https://goreportcard.com/report/emperror.dev/handler/logur)
 [![GolangCI](https://golangci.com/badges/github.com/emperror/handler-logur.svg)](https://golangci.com/r/github.com/emperror/handler-logur)
+[![Go Version](https://img.shields.io/badge/go%20version-%3E=1.12-61CFDD.svg?style=flat-square)](https://github.com/emperror/errors)
 [![GoDoc](http://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://godoc.org/emperror.dev/handler/logur)
 
 **Error handler using [Logur](https://github.com/goph/logur).**
@@ -38,8 +40,8 @@ func main() {
 
 When all coding and testing is done, please run the test suite:
 
-``` bash
-$ make check
+```bash
+make check
 ```
 
 
