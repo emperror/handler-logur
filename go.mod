@@ -4,5 +4,5 @@ go 1.12
 
 require (
 	emperror.dev/errors v0.7.0
-	logur.dev/logur v0.15.1
+	logur.dev/logur v0.16.1
 )
