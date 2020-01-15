@@ -1,6 +1,7 @@
 package logur_test
 
 import (
+	"context"
 	"fmt"
 
 	"emperror.dev/errors"
@@ -10,7 +11,7 @@ import (
 )
 
 func ExampleNew() {
-	logger := logur.NewNoopLogger()
+	logger := &logur.NoopLogger{}
 	_ = logurhandler.New(logger)
 
 	// Output:
@@ -19,6 +20,13 @@ func ExampleNew() {
 type errorLogger struct{}
 
 func (e *errorLogger) Error(msg string, fields ...map[string]interface{}) {
+	fmt.Println(msg)
+	if len(fields) > 0 && len(fields[0]) > 0 {
+		fmt.Println(fields[0])
+	}
+}
+
+func (e *errorLogger) ErrorContext(ctx context.Context, msg string, fields ...map[string]interface{}) {
 	fmt.Println(msg)
 	if len(fields) > 0 && len(fields[0]) > 0 {
 		fmt.Println(fields[0])
@@ -36,6 +44,19 @@ func ExampleHandler_Handle() {
 	err := errors.New("error")
 
 	handler.Handle(err)
+
+	// Output:
+	// error
+}
+
+func ExampleHandler_HandleContext() {
+	logger := newLogurLogger()
+	handler := logurhandler.New(logger)
+
+	ctx := context.Background()
+	err := errors.New("error")
+
+	handler.HandleContext(ctx, err)
 
 	// Output:
 	// error

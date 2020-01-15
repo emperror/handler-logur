@@ -1,6 +1,7 @@
 package logur
 
 import (
+	"context"
 	"testing"
 
 	"emperror.dev/errors"
@@ -84,26 +85,51 @@ func TestHandler(t *testing.T) {
 		},
 	}
 
-	for err, expectedEvents := range tests {
-		err, expectedEvents := err, expectedEvents
+	t.Run("Handle", func(t *testing.T) {
+		for err, expectedEvents := range tests {
+			err, expectedEvents := err, expectedEvents
 
-		t.Run("", func(t *testing.T) {
-			logger := logur.NewTestLogger()
-			handler := New(logger)
+			t.Run("", func(t *testing.T) {
+				logger := &logur.TestLoggerFacade{}
+				handler := New(logger)
 
-			handler.Handle(err)
+				handler.Handle(err)
 
-			if got, want := logger.Count(), len(expectedEvents); got != want {
-				t.Fatalf("recorded %d events, but expected %d", got, want)
-			}
+				if got, want := logger.Count(), len(expectedEvents); got != want {
+					t.Fatalf("recorded %d events, but expected %d", got, want)
+				}
 
-			events := logger.Events()
+				events := logger.Events()
 
-			for i, expectedEvent := range expectedEvents {
-				logtesting.AssertLogEventsEqual(t, expectedEvent, events[i])
-			}
-		})
-	}
+				for i, expectedEvent := range expectedEvents {
+					logtesting.AssertLogEventsEqual(t, expectedEvent, events[i])
+				}
+			})
+		}
+	})
+
+	t.Run("HandleContext", func(t *testing.T) {
+		for err, expectedEvents := range tests {
+			err, expectedEvents := err, expectedEvents
+
+			t.Run("", func(t *testing.T) {
+				logger := &logur.TestLoggerFacade{}
+				handler := New(logger)
+
+				handler.HandleContext(context.Background(), err)
+
+				if got, want := logger.Count(), len(expectedEvents); got != want {
+					t.Fatalf("recorded %d events, but expected %d", got, want)
+				}
+
+				events := logger.Events()
+
+				for i, expectedEvent := range expectedEvents {
+					logtesting.AssertLogEventsEqual(t, expectedEvent, events[i])
+				}
+			})
+		}
+	})
 }
 
 func TestWithStackInfo(t *testing.T) {
@@ -156,7 +182,7 @@ func TestWithStackInfo(t *testing.T) {
 			{
 				Line:   "error",
 				Level:  logur.Error,
-				Fields: map[string]interface{}{"func": "TestWithStackInfo", "file": "handler_test.go:155"},
+				Fields: map[string]interface{}{"func": "TestWithStackInfo", "file": "handler_test.go:181"},
 			},
 		},
 		errors.Combine(
@@ -166,34 +192,59 @@ func TestWithStackInfo(t *testing.T) {
 			{
 				Line:   "error 1",
 				Level:  logur.Error,
-				Fields: map[string]interface{}{"func": "TestWithStackInfo", "file": "handler_test.go:163"},
+				Fields: map[string]interface{}{"func": "TestWithStackInfo", "file": "handler_test.go:189"},
 			},
 			{
 				Line:   "error 2",
 				Level:  logur.Error,
-				Fields: map[string]interface{}{"func": "TestWithStackInfo", "file": "handler_test.go:164"},
+				Fields: map[string]interface{}{"func": "TestWithStackInfo", "file": "handler_test.go:190"},
 			},
 		},
 	}
 
-	for err, expectedEvents := range tests {
-		err, expectedEvents := err, expectedEvents
+	t.Run("Handle", func(t *testing.T) {
+		for err, expectedEvents := range tests {
+			err, expectedEvents := err, expectedEvents
 
-		t.Run("", func(t *testing.T) {
-			logger := logur.NewTestLogger()
-			handler := WithStackInfo(New(logger))
+			t.Run("", func(t *testing.T) {
+				logger := &logur.TestLoggerFacade{}
+				handler := WithStackInfo(New(logger))
 
-			handler.Handle(err)
+				handler.Handle(err)
 
-			if got, want := logger.Count(), len(expectedEvents); got != want {
-				t.Fatalf("recorded %d events, but expected %d", got, want)
-			}
+				if got, want := logger.Count(), len(expectedEvents); got != want {
+					t.Fatalf("recorded %d events, but expected %d", got, want)
+				}
 
-			events := logger.Events()
+				events := logger.Events()
 
-			for i, expectedEvent := range expectedEvents {
-				logtesting.AssertLogEventsEqual(t, expectedEvent, events[i])
-			}
-		})
-	}
+				for i, expectedEvent := range expectedEvents {
+					logtesting.AssertLogEventsEqual(t, expectedEvent, events[i])
+				}
+			})
+		}
+	})
+
+	t.Run("HandleContext", func(t *testing.T) {
+		for err, expectedEvents := range tests {
+			err, expectedEvents := err, expectedEvents
+
+			t.Run("", func(t *testing.T) {
+				logger := &logur.TestLoggerFacade{}
+				handler := WithStackInfo(New(logger))
+
+				handler.HandleContext(context.Background(), err)
+
+				if got, want := logger.Count(), len(expectedEvents); got != want {
+					t.Fatalf("recorded %d events, but expected %d", got, want)
+				}
+
+				events := logger.Events()
+
+				for i, expectedEvent := range expectedEvents {
+					logtesting.AssertLogEventsEqual(t, expectedEvent, events[i])
+				}
+			})
+		}
+	})
 }
