@@ -130,6 +130,29 @@ func TestHandler(t *testing.T) {
 			})
 		}
 	})
+
+	t.Run("HandleContextLogger", func(t *testing.T) {
+		for err, expectedEvents := range tests {
+			err, expectedEvents := err, expectedEvents
+
+			t.Run("", func(t *testing.T) {
+				logger := &logur.TestLogger{}
+				handler := New(logger)
+
+				handler.HandleContext(context.Background(), err)
+
+				if got, want := logger.Count(), len(expectedEvents); got != want {
+					t.Fatalf("recorded %d events, but expected %d", got, want)
+				}
+
+				events := logger.Events()
+
+				for i, expectedEvent := range expectedEvents {
+					logtesting.AssertLogEventsEqual(t, expectedEvent, events[i])
+				}
+			})
+		}
+	})
 }
 
 func TestWithStackInfo(t *testing.T) {
@@ -182,7 +205,7 @@ func TestWithStackInfo(t *testing.T) {
 			{
 				Line:   "error",
 				Level:  logur.Error,
-				Fields: map[string]interface{}{"func": "TestWithStackInfo", "file": "handler_test.go:181"},
+				Fields: map[string]interface{}{"func": "TestWithStackInfo", "file": "handler_test.go:204"},
 			},
 		},
 		errors.Combine(
@@ -192,12 +215,12 @@ func TestWithStackInfo(t *testing.T) {
 			{
 				Line:   "error 1",
 				Level:  logur.Error,
-				Fields: map[string]interface{}{"func": "TestWithStackInfo", "file": "handler_test.go:189"},
+				Fields: map[string]interface{}{"func": "TestWithStackInfo", "file": "handler_test.go:212"},
 			},
 			{
 				Line:   "error 2",
 				Level:  logur.Error,
-				Fields: map[string]interface{}{"func": "TestWithStackInfo", "file": "handler_test.go:190"},
+				Fields: map[string]interface{}{"func": "TestWithStackInfo", "file": "handler_test.go:213"},
 			},
 		},
 	}

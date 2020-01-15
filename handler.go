@@ -12,7 +12,8 @@ import (
 
 // Handler logs errors using a Logur compatible logger.
 type Handler struct {
-	logger ErrorLogger
+	logger        ErrorLogger
+	loggerContext errorLoggerContext
 
 	enableStackInfo bool
 }
@@ -23,11 +24,29 @@ type ErrorLogger interface {
 	//
 	// Critical events that require immediate attention.
 	Error(msg string, fields ...map[string]interface{})
+}
 
+type errorLoggerContext interface {
 	// ErrorContext logs an Error event.
 	//
 	// Critical events that require immediate attention.
 	ErrorContext(ctx context.Context, msg string, fields ...map[string]interface{})
+}
+
+func ensureErrorLoggerContext(logger ErrorLogger) errorLoggerContext {
+	if loggerCtx, ok := logger.(errorLoggerContext); ok {
+		return loggerCtx
+	}
+
+	return errorLoggerContextWrapper{logger}
+}
+
+type errorLoggerContextWrapper struct {
+	logger ErrorLogger
+}
+
+func (e errorLoggerContextWrapper) ErrorContext(_ context.Context, msg string, fields ...map[string]interface{}) {
+	e.logger.Error(msg, fields...)
 }
 
 // New returns a new Handler.
@@ -37,7 +56,8 @@ func New(logger ErrorLogger) *Handler {
 	}
 
 	return &Handler{
-		logger: logger,
+		logger:        logger,
+		loggerContext: ensureErrorLoggerContext(logger),
 	}
 }
 
@@ -160,7 +180,7 @@ func (h *Handler) logErrorContext(ctx context.Context, err error, fields map[str
 		}
 	}
 
-	h.logger.ErrorContext(ctx, err.Error(), fields)
+	h.loggerContext.ErrorContext(ctx, err.Error(), fields)
 }
 
 func getErrors(err error) []error {
