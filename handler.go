@@ -4,6 +4,7 @@ package logur
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"emperror.dev/errors"
 	"emperror.dev/errors/utils/keyval"
@@ -12,9 +13,11 @@ import (
 
 // Handler logs errors using a Logur compatible logger.
 type Handler struct {
-	logger ErrorLogger
+	logger        ErrorLogger
+	loggerContext errorLoggerContext
 
-	enableStackInfo bool
+	enableStackInfo  bool
+	enableStackTrace bool
 }
 
 // ErrorLogger is a subset of the Logur Logger and LoggerContext interfaces used for error logging.
@@ -23,11 +26,29 @@ type ErrorLogger interface {
 	//
 	// Critical events that require immediate attention.
 	Error(msg string, fields ...map[string]interface{})
+}
 
+type errorLoggerContext interface {
 	// ErrorContext logs an Error event.
 	//
 	// Critical events that require immediate attention.
 	ErrorContext(ctx context.Context, msg string, fields ...map[string]interface{})
+}
+
+func ensureErrorLoggerContext(logger ErrorLogger) errorLoggerContext {
+	if loggerCtx, ok := logger.(errorLoggerContext); ok {
+		return loggerCtx
+	}
+
+	return errorLoggerContextWrapper{logger}
+}
+
+type errorLoggerContextWrapper struct {
+	logger ErrorLogger
+}
+
+func (e errorLoggerContextWrapper) ErrorContext(_ context.Context, msg string, fields ...map[string]interface{}) {
+	e.logger.Error(msg, fields...)
 }
 
 // New returns a new Handler.
@@ -37,7 +58,8 @@ func New(logger ErrorLogger) *Handler {
 	}
 
 	return &Handler{
-		logger: logger,
+		logger:        logger,
+		loggerContext: ensureErrorLoggerContext(logger),
 	}
 }
 
@@ -45,6 +67,13 @@ func New(logger ErrorLogger) *Handler {
 // function name and file line of the stack trace's top frame (if one is found).
 func WithStackInfo(handler *Handler) *Handler {
 	handler.enableStackInfo = true
+
+	return handler
+}
+
+// WithStackTrace enables annotating every error passing through the handler with stack trace (if one is found).
+func WithStackTrace(handler *Handler) *Handler {
+	handler.enableStackTrace = true
 
 	return handler
 }
@@ -126,7 +155,7 @@ func (h *Handler) HandleContext(ctx context.Context, err error) {
 // fields are always copied when multiple errors are detected,
 // so we are free to modify it
 func (h *Handler) logError(err error, fields map[string]interface{}) {
-	if h.enableStackInfo {
+	if h.enableStackInfo || h.enableStackTrace {
 		var stackTracer interface{ StackTrace() errors.StackTrace }
 		if errors.As(err, &stackTracer) {
 			stackTrace := stackTracer.StackTrace()
@@ -134,8 +163,14 @@ func (h *Handler) logError(err error, fields map[string]interface{}) {
 			if len(stackTrace) > 0 {
 				frame := stackTrace[0]
 
-				fields["func"] = fmt.Sprintf("%n", frame)
-				fields["file"] = fmt.Sprintf("%v", frame)
+				if h.enableStackInfo {
+					fields["func"] = fmt.Sprintf("%n", frame)
+					fields["file"] = fmt.Sprintf("%v", frame)
+				}
+
+				if h.enableStackTrace {
+					fields["stacktrace"] = strings.TrimLeft(fmt.Sprintf("%+v", stackTrace), "\n")
+				}
 			}
 		}
 	}
@@ -146,7 +181,7 @@ func (h *Handler) logError(err error, fields map[string]interface{}) {
 // fields are always copied when multiple errors are detected,
 // so we are free to modify it
 func (h *Handler) logErrorContext(ctx context.Context, err error, fields map[string]interface{}) {
-	if h.enableStackInfo {
+	if h.enableStackInfo || h.enableStackTrace {
 		var stackTracer interface{ StackTrace() errors.StackTrace }
 		if errors.As(err, &stackTracer) {
 			stackTrace := stackTracer.StackTrace()
@@ -154,13 +189,19 @@ func (h *Handler) logErrorContext(ctx context.Context, err error, fields map[str
 			if len(stackTrace) > 0 {
 				frame := stackTrace[0]
 
-				fields["func"] = fmt.Sprintf("%n", frame)
-				fields["file"] = fmt.Sprintf("%v", frame)
+				if h.enableStackInfo {
+					fields["func"] = fmt.Sprintf("%n", frame)
+					fields["file"] = fmt.Sprintf("%v", frame)
+				}
+
+				if h.enableStackTrace {
+					fields["stacktrace"] = strings.TrimLeft(fmt.Sprintf("%+v", stackTrace), "\n")
+				}
 			}
 		}
 	}
 
-	h.logger.ErrorContext(ctx, err.Error(), fields)
+	h.loggerContext.ErrorContext(ctx, err.Error(), fields)
 }
 
 func getErrors(err error) []error {
