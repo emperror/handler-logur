@@ -1,11 +1,11 @@
 # Logur error handler
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/emperror/handler-logur/CI?style=flat-square)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/emperror/handler-logur/CI?style=flat-square)](https://github.com/emperror/handler-logur/actions?query=workflow%3ACI)
 [![Codecov](https://img.shields.io/codecov/c/github/emperror/handler-logur?style=flat-square)](https://codecov.io/gh/emperror/handler-logur)
 [![Go Report Card](https://goreportcard.com/badge/emperror.dev/handler/logur?style=flat-square)](https://goreportcard.com/report/emperror.dev/handler/logur)
-[![GolangCI](https://golangci.com/badges/github.com/emperror/handler-logur.svg)](https://golangci.com/r/github.com/emperror/handler-logur)
-[![Go Version](https://img.shields.io/badge/go%20version-%3E=1.12-61CFDD.svg?style=flat-square)](https://github.com/emperror/errors)
-[![GoDoc](http://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://pkg.go.dev/emperror.dev/handler/logur)
+![Go Version](https://img.shields.io/badge/go%20version-%3E=1.12-61CFDD.svg?style=flat-square)
+[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/mod/emperror.dev/handler/logur)
+
 
 **Error handler using [Logur](https://github.com/goph/logur).**
 

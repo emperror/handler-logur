@@ -96,6 +96,7 @@ func (h *Handler) Handle(err error) {
 			// Extract details from the error
 			details := errors.GetDetails(e)
 			f := make(map[string]interface{}, len(fields)+len(details)/2)
+
 			for key, value := range fields {
 				f[key] = value
 			}
@@ -133,6 +134,7 @@ func (h *Handler) HandleContext(ctx context.Context, err error) {
 			// Extract details from the error
 			details := errors.GetDetails(e)
 			f := make(map[string]interface{}, len(fields)+len(details)/2)
+
 			for key, value := range fields {
 				f[key] = value
 			}
@@ -154,6 +156,7 @@ func (h *Handler) HandleContext(ctx context.Context, err error) {
 
 // fields are always copied when multiple errors are detected,
 // so we are free to modify it
+// nolint: nestif
 func (h *Handler) logError(err error, fields map[string]interface{}) {
 	if h.enableStackInfo || h.enableStackTrace {
 		var stackTracer interface{ StackTrace() errors.StackTrace }
@@ -180,6 +183,7 @@ func (h *Handler) logError(err error, fields map[string]interface{}) {
 
 // fields are always copied when multiple errors are detected,
 // so we are free to modify it
+// nolint: nestif
 func (h *Handler) logErrorContext(ctx context.Context, err error, fields map[string]interface{}) {
 	if h.enableStackInfo || h.enableStackTrace {
 		var stackTracer interface{ StackTrace() errors.StackTrace }
@@ -208,7 +212,9 @@ func getErrors(err error) []error {
 	if eg, ok := err.(interface{ Errors() []error }); ok {
 		errors := eg.Errors()
 		result := make([]error, len(errors))
+
 		copy(result, errors)
+
 		return result
 	}
 

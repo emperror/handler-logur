@@ -21,6 +21,7 @@ type errorLogger struct{}
 
 func (e *errorLogger) Error(msg string, fields ...map[string]interface{}) {
 	fmt.Println(msg)
+
 	if len(fields) > 0 && len(fields[0]) > 0 {
 		fmt.Println(fields[0])
 	}
@@ -28,6 +29,7 @@ func (e *errorLogger) Error(msg string, fields ...map[string]interface{}) {
 
 func (e *errorLogger) ErrorContext(ctx context.Context, msg string, fields ...map[string]interface{}) {
 	fmt.Println(msg)
+
 	if len(fields) > 0 && len(fields[0]) > 0 {
 		fmt.Println(fields[0])
 	}
