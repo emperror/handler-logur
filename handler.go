@@ -91,7 +91,7 @@ func (h *Handler) Handle(err error) {
 		fields = keyval.ToMap(details)
 	}
 
-	if errs := getErrors(err); len(errs) > 1 || errs[0] == err {
+	if errs := getErrors(err); len(errs) > 1 || errors.Is(errs[0], err) {
 		for _, e := range errs {
 			// Extract details from the error
 			details := errors.GetDetails(e)

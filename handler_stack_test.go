@@ -9,24 +9,7 @@ import (
 	"logur.dev/logur/logtesting"
 )
 
-type errorsStub struct {
-	err     error
-	details []interface{}
-}
-
-func (e *errorsStub) Error() string          { return e.err.Error() }
-func (e *errorsStub) Errors() []error        { return errors.GetErrors(e.err) }
-func (e *errorsStub) Details() []interface{} { return e.details }
-
-type nonComparableError struct {
-	b []byte
-}
-
-func (nonComparableError) Error() string {
-	return "non-comparable error"
-}
-
-func TestHandler(t *testing.T) {
+func TestWithStackInfo(t *testing.T) {
 	tests := map[error][]logur.LogEvent{
 		errors.NewPlain("error"): {
 			{
@@ -74,8 +57,9 @@ func TestHandler(t *testing.T) {
 		},
 		errors.New("error"): {
 			{
-				Line:  "error",
-				Level: logur.Error,
+				Line:   "error",
+				Level:  logur.Error,
+				Fields: map[string]interface{}{"func": "TestWithStackInfo", "file": "handler_stack_test.go:58"},
 			},
 		},
 		errors.Combine(
@@ -83,12 +67,14 @@ func TestHandler(t *testing.T) {
 			errors.New("error 2"),
 		): {
 			{
-				Line:  "error 1",
-				Level: logur.Error,
+				Line:   "error 1",
+				Level:  logur.Error,
+				Fields: map[string]interface{}{"func": "TestWithStackInfo", "file": "handler_stack_test.go:66"},
 			},
 			{
-				Line:  "error 2",
-				Level: logur.Error,
+				Line:   "error 2",
+				Level:  logur.Error,
+				Fields: map[string]interface{}{"func": "TestWithStackInfo", "file": "handler_stack_test.go:67"},
 			},
 		},
 	}
@@ -99,7 +85,7 @@ func TestHandler(t *testing.T) {
 
 			t.Run("", func(t *testing.T) {
 				logger := &logur.TestLoggerFacade{}
-				handler := New(logger)
+				handler := WithStackInfo(New(logger))
 
 				handler.Handle(err)
 
@@ -122,7 +108,7 @@ func TestHandler(t *testing.T) {
 
 			t.Run("", func(t *testing.T) {
 				logger := &logur.TestLoggerFacade{}
-				handler := New(logger)
+				handler := WithStackInfo(New(logger))
 
 				handler.HandleContext(context.Background(), err)
 
@@ -136,55 +122,6 @@ func TestHandler(t *testing.T) {
 					logtesting.AssertLogEventsEqual(t, expectedEvent, events[i])
 				}
 			})
-		}
-	})
-
-	t.Run("HandleContextLogger", func(t *testing.T) {
-		for err, expectedEvents := range tests {
-			err, expectedEvents := err, expectedEvents
-
-			t.Run("", func(t *testing.T) {
-				logger := &logur.TestLogger{}
-				handler := New(logger)
-
-				handler.HandleContext(context.Background(), err)
-
-				if got, want := logger.Count(), len(expectedEvents); got != want {
-					t.Fatalf("recorded %d events, but expected %d", got, want)
-				}
-
-				events := logger.Events()
-
-				for i, expectedEvent := range expectedEvents {
-					logtesting.AssertLogEventsEqual(t, expectedEvent, events[i])
-				}
-			})
-		}
-	})
-
-	t.Run("HandleNonComparableError", func(t *testing.T) {
-		err := nonComparableError{}
-
-		expectedEvents := []logur.LogEvent{
-			{
-				Line:  "non-comparable error",
-				Level: logur.Error,
-			},
-		}
-
-		logger := &logur.TestLoggerFacade{}
-		handler := New(logger)
-
-		handler.Handle(err)
-
-		if got, want := logger.Count(), len(expectedEvents); got != want {
-			t.Fatalf("recorded %d events, but expected %d", got, want)
-		}
-
-		events := logger.Events()
-
-		for i, expectedEvent := range expectedEvents {
-			logtesting.AssertLogEventsEqual(t, expectedEvent, events[i])
 		}
 	})
 }
